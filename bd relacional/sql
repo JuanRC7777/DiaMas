@@ -1,0 +1,25 @@
+create table tarea(
+	id int PRIMARY key auto increment,
+	usuario int not null,
+	titulo text not null,
+	observacion text not null,
+	creado_en text default current_timestamp,
+	fecha_fin text not null,
+	Foreign key (usuario) references usuario(id) on delete CASCADE on update cascade
+);
+
+create table usuario(
+	id int primary kehttps://github.com/JuanRC7777/DiaMasy auto increment,
+	id_persona int not null,
+	id_cargo text not null,
+	id_activo text not NULL,
+
+	FOREING key (id_persona) references persona(id) on delete cascade on update cascade
+);
+
+create table persona(
+	id integer primary key,
+	nombre text not null,
+	apellido text not null,
+	correo text not null unique
+);
