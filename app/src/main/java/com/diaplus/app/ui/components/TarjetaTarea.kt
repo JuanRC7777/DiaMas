@@ -23,30 +23,51 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.diaplus.app.R
-import com.diaplus.app.data.Tarea
+import com.diaplus.app.data.model.Tarea
+import com.diaplus.app.data.model.aFechaHora
+import com.diaplus.app.data.model.fecha
+import com.diaplus.app.data.model.tareasDeEjemplo
+import com.diaplus.app.domain.estaVencida
+import com.diaplus.app.domain.textoDeTiempo
 import com.diaplus.app.ui.theme.Colores
 import com.diaplus.app.ui.theme.ColoresClaros
 import com.diaplus.app.ui.theme.ColoresOscuros
+import java.time.LocalDateTime
 
 @Composable
-fun TarjetaTarea(tarea: Tarea, c: Colores, alMarcar: () -> Unit) {
+fun TarjetaTarea(
+    tarea: Tarea,
+    c: Colores,
+    ahora: LocalDateTime = LocalDateTime.now(),
+    alMarcar: () -> Unit,
+    alTocar: () -> Unit = {},
+) {
+    val vencida = !tarea.completada && estaVencida(tarea.fecha(), ahora)
+    // una tarea que ya quedó dice cuándo se completó (o su fecha, si no se sabe); si no, cuánto falta
+    val cuando = if (tarea.completada) {
+        textoDeTiempo(tarea.completadaMillis?.aFechaHora() ?: tarea.fecha(), ahora)
+    } else {
+        textoDeTiempo(tarea.fecha(), ahora)
+    }
+
     var colorRaya = c.borde
     if (tarea.completada) {
         colorRaya = c.verde
-    } else if (tarea.vencida) {
+    } else if (vencida) {
         colorRaya = c.naranja
     }
 
     var colorCuando = c.textoClaro
     if (tarea.completada) {
         colorCuando = c.verde
-    } else if (tarea.vencida) {
+    } else if (vencida) {
         colorCuando = c.naranja
     }
 
@@ -61,7 +82,8 @@ fun TarjetaTarea(tarea: Tarea, c: Colores, alMarcar: () -> Unit) {
             .padding(bottom = 8.dp)
             .height(IntrinsicSize.Min)
             .clip(RoundedCornerShape(16.dp))
-            .background(fondo),
+            .background(fondo)
+            .clickable { alTocar() },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
@@ -84,7 +106,7 @@ fun TarjetaTarea(tarea: Tarea, c: Colores, alMarcar: () -> Unit) {
             if (tarea.completada) {
                 Icon(
                     painter = painterResource(R.drawable.ic_check),
-                    contentDescription = "completada",
+                    contentDescription = stringResource(R.string.completada),
                     tint = Color.White,
                     modifier = Modifier.size(12.dp)
                 )
@@ -104,18 +126,18 @@ fun TarjetaTarea(tarea: Tarea, c: Colores, alMarcar: () -> Unit) {
                 textDecoration = if (tarea.completada) TextDecoration.LineThrough else null
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (tarea.vencida && !tarea.completada) {
+                if (vencida) {
                     Text(
-                        text = "vencida · ",
+                        text = stringResource(R.string.vencida) + " · ",
                         color = c.naranja,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
-                Text(text = tarea.cuando, color = colorCuando, fontSize = 12.sp)
+                Text(text = cuando, color = colorCuando, fontSize = 12.sp)
                 if (tarea.aviso30 && !tarea.completada) {
                     Text(
-                        text = "+30m",
+                        text = stringResource(R.string.aviso_30),
                         color = c.textoClaro,
                         fontSize = 9.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -129,10 +151,11 @@ fun TarjetaTarea(tarea: Tarea, c: Colores, alMarcar: () -> Unit) {
             }
         }
 
-        if (!tarea.completada) {
+        // la campana solo sale si la tarea tiene recordatorio
+        if (!tarea.completada && tarea.fechaMillis != null) {
             Icon(
                 painter = painterResource(R.drawable.ic_campana),
-                contentDescription = "recordatorio",
+                contentDescription = stringResource(R.string.recordatorio),
                 tint = c.textoClaro,
                 modifier = Modifier
                     .padding(end = 16.dp)
@@ -146,7 +169,7 @@ fun TarjetaTarea(tarea: Tarea, c: Colores, alMarcar: () -> Unit) {
 @Composable
 fun PreviewTarjetaNormal() {
     Column(modifier = Modifier.padding(16.dp)) {
-        TarjetaTarea(Tarea("Estudiar para parcial de Cálculo", "en 2d · 20:00"), ColoresClaros, alMarcar = {})
+        TarjetaTarea(tareasDeEjemplo()[2], ColoresClaros, alMarcar = {})
     }
 }
 
@@ -154,7 +177,7 @@ fun PreviewTarjetaNormal() {
 @Composable
 fun PreviewTarjetaVencida() {
     Column(modifier = Modifier.padding(16.dp)) {
-        TarjetaTarea(Tarea("Pagar renta", "hace 3h · 14:00", vencida = true), ColoresClaros, alMarcar = {})
+        TarjetaTarea(tareasDeEjemplo()[0], ColoresClaros, alMarcar = {})
     }
 }
 
@@ -162,7 +185,7 @@ fun PreviewTarjetaVencida() {
 @Composable
 fun PreviewTarjetaAviso() {
     Column(modifier = Modifier.padding(16.dp)) {
-        TarjetaTarea(Tarea("Entregar ensayo de Comunicación", "mañana · 20:28", aviso30 = true), ColoresClaros, alMarcar = {})
+        TarjetaTarea(tareasDeEjemplo()[1], ColoresClaros, alMarcar = {})
     }
 }
 
@@ -170,7 +193,7 @@ fun PreviewTarjetaAviso() {
 @Composable
 fun PreviewTarjetaCompletada() {
     Column(modifier = Modifier.padding(16.dp)) {
-        TarjetaTarea(Tarea("Mandar correo al profesor", "hace 2d · 11:00", completada = true), ColoresClaros, alMarcar = {})
+        TarjetaTarea(tareasDeEjemplo()[3], ColoresClaros, alMarcar = {})
     }
 }
 
@@ -178,6 +201,6 @@ fun PreviewTarjetaCompletada() {
 @Composable
 fun PreviewTarjetaOscura() {
     Column(modifier = Modifier.padding(16.dp)) {
-        TarjetaTarea(Tarea("Pagar renta", "hace 3h · 14:00", vencida = true), ColoresOscuros, alMarcar = {})
+        TarjetaTarea(tareasDeEjemplo()[0], ColoresOscuros, alMarcar = {})
     }
 }

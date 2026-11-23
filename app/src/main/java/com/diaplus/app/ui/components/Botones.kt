@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -35,7 +36,7 @@ fun BotonMas(c: Colores, alTocar: () -> Unit, modifier: Modifier = Modifier) {
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_mas),
-            contentDescription = "nueva tarea",
+            contentDescription = stringResource(R.string.nueva_tarea_boton),
             tint = Color.White,
             modifier = Modifier.size(24.dp)
         )
@@ -51,7 +52,7 @@ fun TituloCompletadas(c: Colores, cantidad: Int, alTocar: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "YA QUEDÓ · $cantidad",
+            text = stringResource(R.string.ya_quedo_titulo, cantidad),
             color = c.textoClaro,
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,

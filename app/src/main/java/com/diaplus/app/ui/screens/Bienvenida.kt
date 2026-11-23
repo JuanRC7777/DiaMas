@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,12 +44,12 @@ fun Bienvenida(c: Colores) {
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_logo_sol),
-                contentDescription = "logo",
+                contentDescription = stringResource(R.string.logo),
                 tint = c.naranja,
                 modifier = Modifier.size(72.dp)
             )
             Text(
-                text = "DÍA+",
+                text = stringResource(R.string.app_name),
                 color = c.naranja,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.ExtraBold,
@@ -59,7 +60,7 @@ fun Bienvenida(c: Colores) {
         }
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = "todo en orden, nada en la cabeza",
+            text = stringResource(R.string.bienvenida_frase),
             color = c.textoClaro,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium

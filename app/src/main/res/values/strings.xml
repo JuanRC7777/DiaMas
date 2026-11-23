@@ -1,3 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">DÍA+</string>
+
+    <!-- Bienvenida -->
+    <string name="logo">logo</string>
+    <string name="bienvenida_frase">todo en orden, nada en la cabeza</string>
+
+    <!-- Encabezado -->
+    <string name="saludo_dia">Buenos días</string>
+    <string name="saludo_tarde">Buenas tardes</string>
+    <string name="saludo_noche">Buenas noches</string>
+    <string-array name="dias_semana">
+        <item>Lunes</item>
+        <item>Martes</item>
+        <item>Miércoles</item>
+        <item>Jueves</item>
+        <item>Viernes</item>
+        <item>Sábado</item>
+        <item>Domingo</item>
+    </string-array>
+    <string name="sin_pendientes">Un día menos con pendientes</string>
+    <plurals name="pendientes">
+        <item quantity="one">%d pendiente</item>
+        <item quantity="other">%d pendientes</item>
+    </plurals>
+    <plurals name="racha">
+        <item quantity="one">racha de %d día</item>
+        <item quantity="other">racha de %d días</item>
+    </plurals>
+    <string name="cambiar_tema">cambiar tema</string>
+    <string name="abrir_ajustes">ajustes</string>
+
+    <!-- Campo «Anotar algo…» -->
+    <string name="anotar_placeholder">Anotar algo... \"entregar mañana 3pm\"</string>
+    <string name="anotar">anotar</string>
+
+    <!-- Tarjeta de tarea -->
+    <string name="completada">completada</string>
+    <string name="recordatorio">recordatorio</string>
+    <string name="vencida">vencida</string>
+    <string name="aviso_30">+30m</string>
+
+    <!-- Lista de tareas -->
+    <string name="nueva_tarea_boton">nueva tarea</string>
+    <string name="ya_quedo_titulo">YA QUEDÓ · %d</string>
+    <string name="borrar">Borrar</string>
+    <string name="lista_vacia_titulo">La lista está limpia</string>
+    <string name="lista_vacia_texto">Escribe algo arriba para anotar tu primer pendiente. Sin pendientes, sin ruido.</string>
+    <string name="deshacer">Deshacer</string>
+    <string name="aviso_completada">Tarea completada</string>
+    <string name="aviso_borrada">Tarea borrada</string>
+
+    <!-- Formulario -->
+    <string name="nueva_tarea">Nueva tarea</string>
+    <string name="que_tienes_que_hacer">¿Qué tienes que hacer?</string>
+    <string name="fecha_vacia">dd/mm/aaaa</string>
+    <string name="hora_vacia">--:--</string>
+    <string name="quitar_fecha">Quitar fecha</string>
+    <string name="avisar_antes">Avisar también 30 min antes</string>
+    <string name="avisar_antes_detalle">Para tener margen de reacción real</string>
+    <string name="ya_quedo">Ya quedó</string>
+
+    <!-- Pantalla de editar -->
+    <string name="editar_tarea">Editar tarea</string>
+    <string name="volver">volver</string>
+    <string name="guardar_cambios">Guardar cambios</string>
+    <string name="borrar_tarea">Borrar tarea</string>
+
+    <!-- Calendario -->
+    <string name="calendario">Calendario</string>
+    <string name="hoy">Hoy</string>
+    <string name="mes_anterior">mes anterior</string>
+    <string name="mes_siguiente">mes siguiente</string>
+    <string-array name="meses">
+        <item>Enero</item>
+        <item>Febrero</item>
+        <item>Marzo</item>
+        <item>Abril</item>
+        <item>Mayo</item>
+        <item>Junio</item>
+        <item>Julio</item>
+        <item>Agosto</item>
+        <item>Septiembre</item>
+        <item>Octubre</item>
+        <item>Noviembre</item>
+        <item>Diciembre</item>
+    </string-array>
+    <string-array name="dias_letras">
+        <item>L</item>
+        <item>M</item>
+        <item>M</item>
+        <item>J</item>
+        <item>V</item>
+        <item>S</item>
+        <item>D</item>
+    </string-array>
+    <string name="mes_titulo">%1$s %2$d</string>
+    <string name="dia_titulo">%1$s %2$d de %3$s</string>
+    <string name="dia_descripcion">%1$d de %2$s, %3$s</string>
+    <plurals name="actividades">
+        <item quantity="one">%d actividad</item>
+        <item quantity="other">%d actividades</item>
+    </plurals>
+    <string name="leyenda_pendiente">pendiente</string>
+    <string name="leyenda_vencida">vencida</string>
+    <string name="leyenda_hecha">ya quedó</string>
+    <string name="dia_libre_titulo">Día libre</string>
+    <string name="dia_libre_texto">Toca + para anotar algo en este día.</string>
+
+    <!-- Ajustes -->
+    <string name="ajustes">Ajustes</string>
+    <string name="ajuste_oscuro">Modo oscuro</string>
+    <string name="ajuste_oscuro_detalle">Fondo oscuro, más cómodo de noche</string>
+    <string name="ajuste_sonido">Sonido de los avisos</string>
+    <string name="ajuste_sonido_detalle">Si lo apagas, los avisos llegan en silencio</string>
+
+    <!-- Notificaciones -->
+    <string name="canal_nombre">Recordatorios</string>
+    <string name="canal_descripcion">Avisos a la hora de cada tarea</string>
+    <string name="aviso_en_30">En 30 minutos</string>
+    <string name="aviso_ahora">Es ahora</string>
 </resources>

@@ -1,5 +1,6 @@
-package com.diaplus.app.ui.screens
+package com.diaplus.app.ui.screens.inicio
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -17,26 +18,29 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.diaplus.app.R
-import com.diaplus.app.data.Tarea
-import com.diaplus.app.data.tareasDeEjemplo
+import com.diaplus.app.data.model.Tarea
+import com.diaplus.app.ui.components.AvisoDeshacer
 import com.diaplus.app.ui.components.BotonMas
 import com.diaplus.app.ui.components.CampoAnotar
 import com.diaplus.app.ui.components.Encabezado
@@ -45,28 +49,34 @@ import com.diaplus.app.ui.components.TarjetaTarea
 import com.diaplus.app.ui.components.TituloCompletadas
 import com.diaplus.app.ui.theme.Colores
 import com.diaplus.app.ui.theme.ColoresClaros
+import java.time.LocalDateTime
 
-// los ultimos parametros son para los previews
+// solo dibuja el estado que le llega y avisa de lo que hace el usuario;
+// las tareas las maneja InicioViewModel.
+// los dos ultimos parametros son para los previews
 @Composable
 fun PantallaPrincipal(
     c: Colores,
     oscuro: Boolean,
     cambiarTema: () -> Unit,
-    tareasIniciales: List<Tarea> = tareasDeEjemplo,
+    estado: InicioEstado,
+    ahora: LocalDateTime = LocalDateTime.now(),
+    alAnotar: (String) -> Unit = {},
+    alGuardarNueva: (String, LocalDateTime?, Boolean) -> Unit = { _, _, _ -> },
+    alMarcar: (Tarea) -> Unit = {},
+    alBorrar: (Tarea) -> Unit = {},
+    alAbrir: (Tarea) -> Unit = {},
+    alDeshacer: () -> Unit = {},
+    alAbrirAjustes: () -> Unit = {},
+    alAbrirCalendario: () -> Unit = {},
     abrirCompletadas: Boolean = false,
     abrirFormulario: Boolean = false,
 ) {
-    val tareas = remember { tareasIniciales.toMutableStateList() }
     var verCompletadas by remember { mutableStateOf(abrirCompletadas) }
     var verFormulario by remember { mutableStateOf(abrirFormulario) }
 
-    val pendientes = tareas.filter { !it.completada }
-    val completadas = tareas.filter { it.completada }
-
-    fun marcar(tarea: Tarea) {
-        val posicion = tareas.indexOf(tarea)
-        tareas[posicion] = tarea.copy(completada = !tarea.completada)
-    }
+    val pendientes = estado.pendientes
+    val completadas = estado.completadas
 
     Box(
         modifier = Modifier
@@ -80,30 +90,44 @@ fun PantallaPrincipal(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
         ) {
-            Encabezado(c, oscuro, pendientes.size, cambiarTema)
+            Encabezado(c, oscuro, pendientes.size, cambiarTema, racha = estado.racha, abrirAjustes = alAbrirAjustes, abrirCalendario = alAbrirCalendario)
 
-            CampoAnotar(c)
+            CampoAnotar(c, alEnviar = alAnotar)
             Spacer(modifier = Modifier.height(12.dp))
 
-            if (tareas.isEmpty()) {
+            if (pendientes.isEmpty() && completadas.isEmpty() && !estado.cargando) {
                 ListaVacia(c)
             }
 
             for (tarea in pendientes) {
-                TarjetaTarea(tarea, c, alMarcar = { marcar(tarea) })
+                TarjetaDeslizable(tarea, c, ahora, alMarcar, alAbrir, alBorrar)
             }
 
             if (completadas.isNotEmpty()) {
                 TituloCompletadas(c, completadas.size, alTocar = { verCompletadas = !verCompletadas })
                 if (verCompletadas) {
                     for (tarea in completadas) {
-                        TarjetaTarea(tarea, c, alMarcar = { marcar(tarea) })
+                        TarjetaDeslizable(tarea, c, ahora, alMarcar, alAbrir, alBorrar)
                     }
                 }
             }
 
             // para que el boton + no tape la ultima tarea
             Spacer(modifier = Modifier.height(100.dp))
+        }
+
+        val aviso = estado.avisoDeshacer
+        if (aviso != null) {
+            // el margen derecho es para no quedar debajo del boton +
+            AvisoDeshacer(
+                c,
+                stringResource(if (aviso == TipoAviso.COMPLETADA) R.string.aviso_completada else R.string.aviso_borrada),
+                alDeshacer,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .navigationBarsPadding()
+                    .padding(start = 16.dp, end = 92.dp, bottom = 30.dp)
+            )
         }
 
         BotonMas(
@@ -116,6 +140,9 @@ fun PantallaPrincipal(
         )
 
         if (verFormulario) {
+            // el boton atras cierra la hoja en vez de salir de la app
+            BackHandler { verFormulario = false }
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -127,11 +154,48 @@ fun PantallaPrincipal(
                     .align(Alignment.BottomCenter)
                     .imePadding()
             ) {
-                FormularioTarea(c, alGuardar = { titulo ->
-                    tareas.add(0, Tarea(titulo, "sin fecha"))
+                FormularioTarea(c, alGuardar = { titulo, fecha, aviso30 ->
+                    alGuardarNueva(titulo, fecha, aviso30)
                     verFormulario = false
                 })
             }
+        }
+    }
+}
+
+// la tarjeta de siempre, pero deslizarla hacia la izquierda la borra
+@Composable
+fun TarjetaDeslizable(
+    tarea: Tarea,
+    c: Colores,
+    ahora: LocalDateTime,
+    alMarcar: (Tarea) -> Unit,
+    alAbrir: (Tarea) -> Unit,
+    alBorrar: (Tarea) -> Unit,
+) {
+    // key: cada tarea recuerda su propio deslizamiento aunque cambie el orden de la lista
+    key(tarea.id) {
+        val deslizar = rememberSwipeToDismissBoxState()
+
+        SwipeToDismissBox(
+            state = deslizar,
+            enableDismissFromStartToEnd = false,
+            onDismiss = { alBorrar(tarea) },
+            backgroundContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 8.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(c.naranja)
+                        .padding(end = 20.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Text(text = stringResource(R.string.borrar), color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+        ) {
+            TarjetaTarea(tarea, c, ahora, alMarcar = { alMarcar(tarea) }, alTocar = { alAbrir(tarea) })
         }
     }
 }
@@ -159,10 +223,10 @@ fun ListaVacia(c: Colores) {
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Text(text = "La lista está limpia", color = c.texto, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
+        Text(text = stringResource(R.string.lista_vacia_titulo), color = c.texto, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Escribe algo arriba para anotar tu primer pendiente. Sin pendientes, sin ruido.",
+            text = stringResource(R.string.lista_vacia_texto),
             color = c.textoClaro,
             fontSize = 12.sp,
             textAlign = TextAlign.Center
