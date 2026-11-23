@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- mostrar los recordatorios (se pide al usuario desde Android 13) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- que el aviso llegue a la hora exacta. Desde Android 13 se usa USE_EXACT_ALARM,
+         que no hay que pedirle al usuario; el otro es para Android 12 -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
+    <!-- volver a programar los avisos al reiniciar el telefono -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <application
+        android:name=".DiaPlusApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -20,6 +32,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- recibe las alarmas de las tareas y el aviso de que el telefono se reinicio -->
+        <receiver
+            android:name=".notifications.ReceptorAviso"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
